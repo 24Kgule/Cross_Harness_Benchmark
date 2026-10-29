@@ -316,20 +316,4 @@ Docker/固定运行时就绪后可执行无模型的容器评分检查：
 .venv-harbor/bin/python scripts/smoke_nop.py
 ```
 
-## 8. 上传到 GitHub
-
-建议上传本目录自身作为仓库根目录。`.gitignore` 已排除运行结果、数据集、凭据、缓存、依赖和私有运行时；上传前仍检查 `git status --short`。
-
-```bash
-# 如果下载的是 ZIP，先 git init；若目录已有 .git，不需重新初始化
-git init -b main
-git add .
-git diff --cached --stat
-git commit -m "Add config-driven single-model cross-harness benchmark"
-git remote add origin https://github.com/<YOUR_ACCOUNT>/<YOUR_REPO>.git
-git push -u origin main
-```
-
-在 GitHub 创建一个空仓库后替换上述地址；若已配置 origin，使用 `git remote set-url origin ...`。上传不需要提交 `.env`、`runs/` 或任何实验成绩。
-
 第三方项目和数据来源见 [NOTICE.md](NOTICE.md)。

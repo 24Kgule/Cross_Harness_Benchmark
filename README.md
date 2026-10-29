@@ -4,19 +4,51 @@
 
 本仓库只分发执行、评分、统计和绘图代码及软件/数据集版本配置。运行产生的数据、任务文件、图表和报告均保存在本地 `runs/`，不随仓库提供。
 
-支持的数据集：SWE-Bench Verified 1.0、Terminal-Bench **2.0**、AppWorld 0.1.3.post1。支持的 harness 配置名称：`codex`、`claude`、`dsh`、`opencode`、`pi`、`kimi`。当前不包含 Terminal-Bench 4.0 适配器。
+支持的数据集：SWE-Bench Verified 1.0、Terminal-Bench **2.0**、AppWorld 0.1.3.post1。支持的 harness 配置名称：`codex`、`claude`、`dsh`、`opencode`、`pi`、`kimi`。
 
 ## 1. 环境与安装
 
 运行环境为 Linux x86_64、Docker Engine + Compose v2、cgroup v2。宿主需要 Python 3.12、Git、curl、`dpkg-deb` 和访问软件源/数据集源的网络。Docker Desktop、Windows/macOS 原生运行、远程 Docker 和 ARM 尚不支持本地 cgroup 采样。执行账户需要 Docker 权限。
 
+### 1.1 从空机器准备系统环境
+
+以下以 **Ubuntu 24.04 x86_64** 为例。已有对应组件可跳过安装；其它 Linux 发行版请使用相应软件源，Python 版本仍需为 3.12。
+
 ```bash
-git clone https://github.com/<YOUR_ACCOUNT>/<YOUR_REPO>.git
-cd <YOUR_REPO>
+sudo apt-get update
+sudo apt-get install -y git curl ca-certificates dpkg tar xz-utils unzip \
+  python3.12 python3.12-venv python3-pip
+
+# 若尚未安装 Docker，Ubuntu 24.04 软件源可安装以下包
+sudo apt-get install -y docker.io docker-compose-v2
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+```
+
+加入 `docker` 组后，退出登录再重新登录，使组权限生效。也可按 [Docker 官方指南](https://docs.docker.com/engine/install/ubuntu/) 安装 Docker Engine 和 Compose 插件；已有 Docker 时不必混装两套软件包。检查当前用户的访问权限和 cgroup：
+
+```bash
+python3.12 --version              # 应为 Python 3.12.x；系统的 python3 可能是其它版本
+python3.12 -m venv --help          # 确认已安装 venv 模块
+docker version                   # Client 和 Server 均应可访问
+docker compose version           # 应为 v2
+docker info --format '{{.CgroupVersion}}'  # 应为 2
+stat -fc %T /sys/fs/cgroup        # 应为 cgroup2fs
+```
+
+### 1.2 推荐：自动创建隔离环境并安装
+
+安装器只使用 Python 标准库启动，**不要求事先存在任何 `.venv-*` 环境**。在仓库根执行：
+
+```bash
+git clone https://github.com/24Kgule/Cross_Harness_Benchmark.git
+cd Cross_Harness_Benchmark
 python3.12 -m harness_benchmark.install --appworld
 ```
 
-`--appworld` 为可选项；只运行 SWE/TB 时可以省略。安装器把 Node、Python、uv 和六种 CLI 安装到本仓库的私有路径，不写入用户全局 harness 配置：
+`--appworld` 为可选项；只运行 SWE/TB 时可以省略。安装器先下载固定运行时和六种 CLI，再用固定的 **CPython 3.12.15** 自动创建 `.venv-harbor`，按根目录 [`requirements.txt`](requirements.txt) 安装主程序依赖；指定 `--appworld` 时，还会创建 `.venv-appworld` 并按 [`requirements-appworld.txt`](requirements-appworld.txt) 安装独立依赖。两个入口分别引用 `configs/` 中的完整版本锁文件，避免维护两份版本清单。
+
+安装器把 Node、Python、uv 和六种 CLI 安装到本仓库的私有路径，不写入用户全局 harness 配置：
 
 | 组件 | 固定版本 / 路径 |
 |---|---|
@@ -31,6 +63,58 @@ python3.12 -m harness_benchmark.install --appworld
 | Node / Python | 24.9.0 / 3.12.15；TB 评分另备 3.13.5 |
 
 安装以 `vendor/*/package-lock.json`、`configs/*.requirements.lock.txt` 和二进制 SHA256 为准。需要改变版本时，更新相应锁文件，并使用新的输出目录。不要以不同版本的程序续跑同一批实验。`--skip-binary-hash-check` 仅用于主动采用其它运行时的情况，不能据此声称二进制一致。
+
+### 1.3 Python 环境分工与手动安装
+
+| 环境 | 依赖入口 | 用途 |
+|---|---|---|
+| `.venv-harbor`，Python 3.12.15 | `requirements.txt` → `configs/harbor.requirements.lock.txt` | 主执行器、Harbor、API 网关、资源采样、统计绘图和本地测试 |
+| `.venv-appworld`，Python 3.12.15 | `requirements-appworld.txt` → `configs/appworld.requirements.lock.txt` | 可选的 AppWorld 世界进程、官方 CLI 和评分 |
+| `runs/<experiment>/dependencies/swe-parser` | `configs/swe-parser.requirements.lock.txt` | SWE 官方评分解析；由 `prepare` 自动创建，无需手工安装 |
+
+**不要把 AppWorld 与主程序依赖装进同一个虚拟环境**：AppWorld 需要 Pydantic 1，Harbor 需要 Pydantic 2。Python requirements 只安装 Python 包；完整实验还需运行上面的安装器，以准备 CLI、Node、固定 Python 和评分工具。AppWorld 数据的解密与下载见第 4 节。
+
+如果仅需检查代码或对已有 CSV 绘图，可用系统 Python 3.12 手动创建主环境，不需要先下载 CLI：
+
+```bash
+python3.12 -m venv .venv-harbor
+.venv-harbor/bin/python -m pip install -r requirements.txt
+.venv-harbor/bin/python -m pip check
+```
+
+完整实验以自动安装的固定运行时为准。若需要在运行时已下载后手动重建 Python 环境，在退出已激活的虚拟环境后执行以下命令；重建前请自行移走已有的同名环境：
+
+```bash
+.runtime/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12 -m venv .venv-harbor
+.venv-harbor/bin/python -m pip install -r requirements.txt
+.venv-harbor/bin/python -m pip check
+
+# 仅当实验包含 AppWorld 时需要
+.runtime/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12 -m venv .venv-appworld
+.venv-appworld/bin/python -m pip install -r requirements-appworld.txt
+.venv-appworld/bin/python -m pip check
+```
+
+检查解释器与关键依赖：
+
+```bash
+.venv-harbor/bin/python --version
+.venv-harbor/bin/python -c 'from importlib.metadata import version; print({p: version(p) for p in ("harbor", "aiohttp", "psutil", "numpy", "matplotlib", "pydantic")})'
+# 仅在安装 AppWorld 后执行
+.venv-appworld/bin/python -c 'from importlib.metadata import version; print({p: version(p) for p in ("appworld", "pydantic")})'
+```
+
+自动安装使用 `uv` 创建环境并同步依赖，不保证环境中带有 `pip` 命令。需要重新同步或检查自动安装的环境时，使用仓库自带的 `uv`：
+
+```bash
+.runtime/bin/uv095/uv pip sync --python .venv-harbor/bin/python requirements.txt
+.runtime/bin/uv095/uv pip check --python .venv-harbor/bin/python
+# 仅在安装 AppWorld 后执行
+.runtime/bin/uv095/uv pip sync --python .venv-appworld/bin/python requirements-appworld.txt
+.runtime/bin/uv095/uv pip check --python .venv-appworld/bin/python
+```
+
+后续示例直接指定 `.venv-harbor/bin/python`，因此**无需激活环境**。若更喜欢激活方式，可执行 `source .venv-harbor/bin/activate`，之后使用 `python -m ...`，完成后执行 `deactivate`；不要同时激活两套环境。`run` 会按配置启动独立的 AppWorld Python，主命令仍在 Harbor 环境中运行。
 
 全量 SWE 镜像可能需要数百 GB 以上磁盘；任务的下载、镜像和评分准备时间与模型执行时间分开。先使用少量样本检查本机容量，再扩大规模。
 

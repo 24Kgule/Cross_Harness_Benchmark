@@ -12,7 +12,7 @@
 experiment_api/private/
 runs/
 results/
-datasets/
+/datasets/
 data/
 experiments/
 jobs/

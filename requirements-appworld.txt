@@ -1,0 +1,4 @@
+# Optional AppWorld worker only; Python 3.12, separate .venv-appworld.
+# Do not install alongside requirements.txt: AppWorld uses Pydantic 1,
+# whereas Harbor uses Pydantic 2.
+-r configs/appworld.requirements.lock.txt

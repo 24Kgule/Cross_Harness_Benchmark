@@ -1,0 +1,5 @@
+# Main runner, API gateway, resource monitoring, analysis and plotting.
+# Python 3.12 (the benchmark installer pins CPython 3.12.15).
+# Install in .venv-harbor; AppWorld must use its own environment.
+# Keep the complete pinned dependency list in one place.
+-r configs/harbor.requirements.lock.txt

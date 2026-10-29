@@ -106,12 +106,12 @@ def main():
     if differences and not args.skip_binary_hash_check:
         raise RuntimeError('Runtime differs from experiment binary hashes: '+', '.join(differences))
     run(binary/'uv095/uv','venv','--allow-existing',ROOT/'.venv-harbor','--python',python/'bin/python3.12')
-    run(binary/'uv095/uv','pip','sync','--python',ROOT/'.venv-harbor/bin/python',ROOT/'configs/harbor.requirements.lock.txt')
+    run(binary/'uv095/uv','pip','sync','--python',ROOT/'.venv-harbor/bin/python',ROOT/'requirements.txt')
     for executable in [binary/'node',binary/'codex',binary/'uv',binary/'uv095/uv',binary/'rg']:run(executable,'--version')
     run(python/'bin/python3.12','--version');run(python13/'bin/python3.13','--version')
     if args.appworld:
         run(binary/'uv095/uv','venv','--allow-existing',ROOT/'.venv-appworld','--python',python/'bin/python3.12')
-        run(binary/'uv095/uv','pip','sync','--python',ROOT/'.venv-appworld/bin/python',ROOT/'configs/appworld.requirements.lock.txt')
+        run(binary/'uv095/uv','pip','sync','--python',ROOT/'.venv-appworld/bin/python',ROOT/'requirements-appworld.txt')
     print('Pinned runtime ready. No provider credential was read.')
 
 

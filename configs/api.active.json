@@ -1,0 +1,14 @@
+{
+  "provider": "relay",
+  "model_env": "model_name",
+  "base_url_env": "url",
+  "api_key_env": "NEW_API_KEY",
+  "accepted_response_models": [
+    "DeepSeek-V4.1-Flash-1017",
+    "Vendor3/DeepSeek-V4.1-Flash-1017"
+  ],
+  "requested_max_output_tokens": 65536,
+  "requested_context_tokens": 1048576,
+  "pricing_status": "relay_tariff_not_provided",
+  "official_api_fallback": false
+}

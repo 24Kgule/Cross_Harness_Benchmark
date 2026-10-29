@@ -1,0 +1,9 @@
+{
+  ".runtime/bin/node": "3dc61cdcc38781a678b31903d2f69ed16094206e2258df53a4eb2c0fe4f0a793",
+  ".runtime/bin/codex": "399ff69c431c066e40de318fba45c2b07f45a76b19939d247ee4828fc70c4215",
+  ".runtime/bin/rg": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+  ".runtime/bin/uv": "04e7399b45054f5ae4239ed60cd579311daafdd8d43e0e6ac01003436f19eaac",
+  ".runtime/bin/uv095/uv": "d3dc3ca8e29337dd602a9a4df9e6edb15ebc52aed91461debeedb96939dc4ce0",
+  ".runtime/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12": "708fefcd7df61b1327cb7b9740fafd42cb2f6cd1d387378892d4a28b7479fb78",
+  ".runtime/python/cpython-3.13.5-linux-x86_64-gnu/bin/python3.13": "131392d1acebabe0110aa42c4597eccf8950475c797574fe63c4d4041bfa20ae"
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "output_dir": "runs/quickstart",
+  "harnesses": ["dsh", "pi"],
+  "datasets": [
+    {"name": "terminal-bench", "sample_size": 2, "seed": 20261029}
+  ],
+  "execution": {"workers": 1}
+}

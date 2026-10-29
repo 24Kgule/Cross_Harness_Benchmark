@@ -1,0 +1,13 @@
+{
+  "prepared_at": "2026-10-28T21:05:12.324194+00:00",
+  "model_calls": 0,
+  "package": "sshpass",
+  "version": "1.09-1+b1",
+  "architecture": "amd64",
+  "source_url": "https://mirrors.tuna.tsinghua.edu.cn/debian/pool/main/s/sshpass/sshpass_1.09-1+b1_amd64.deb",
+  "package_sha256": "d2256f010fa2f8dca765c44ea7a77c675f718619c88bd511f4a542ca718d783f",
+  "binary_sha256": "66359326e9bb12366aac1316c1d4a7ac846012599a70b11a345370bfc53acf00",
+  "metadata_origin": "APT package index baked into pinned official QEMU task image",
+  "image_id": "sha256:e868510787ba024e1fced364e94b5ae42c9b3076fa2345498edb833752188f93",
+  "filename": "pool/main/s/sshpass/sshpass_1.09-1+b1_amd64.deb"
+}

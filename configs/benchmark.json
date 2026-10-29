@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "output_dir": "runs/my-benchmark",
+  "api_config": "configs/api.active.json",
+  "harnesses": ["codex", "claude", "dsh", "opencode", "pi", "kimi"],
+  "datasets": [
+    {"name": "swebench-verified", "enabled": true, "sample_size": 25, "seed": 20261029},
+    {"name": "terminal-bench", "enabled": true, "sample_size": 40, "seed": 20261029},
+    {"name": "appworld", "enabled": true, "split": "test_normal", "sample_size": 50, "seed": 20261029}
+  ],
+  "execution": {
+    "workers": 2,
+    "minimum_cpus": 2,
+    "minimum_memory_mb": 6144,
+    "max_requests": 50000,
+    "agent_network": "task-default",
+    "image_mirror": "",
+    "pypi_index": "https://pypi.org/simple",
+    "hf_endpoint": null,
+    "appworld_root": "datasets/appworld",
+    "appworld_python": ".venv-appworld/bin/python",
+    "appworld_image": "python:3.12-slim",
+    "appworld_timeout_sec": 1800,
+    "appworld_max_interactions": 200,
+    "appworld_code_timeout_sec": 60
+  }
+}
